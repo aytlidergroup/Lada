@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestiune Lăzi & Paleți</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #1d4ed8;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+      --in-color: #15803d;
+      --in-bg: #dcfce7;
+      --out-color: #b91c1c;
+      --out-bg: #fee2e2;
+      --red-lada: #dc2626;
+      --black-lada: #1e293b;
+      --palet-color: #b45309;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 14px;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 16px 20px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .status-badge {
+      font-size: 0.8rem;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #facc15;
+    }
+
+    .dot.connected {
+      background: #4ade80;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 10px;
+      border: none;
+      border-radius: 10px;
+      background: #e2e8f0;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 14px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+      background: #fff;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .company-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .company-row select {
+      flex: 1;
+    }
+
+    .btn-add-company {
+      padding: 0 16px;
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .radio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .radio-card {
+      position: relative;
+    }
+
+    .radio-card input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: 0.2s;
+      user-select: none;
+      font-size: 0.95rem;
+    }
+
+    .radio-card input[value="Intrare"]:checked + .radio-label {
+      background: var(--in-bg);
+      border-color: var(--in-color);
+      color: var(--in-color);
+    }
+
+    .radio-card input[value="Ieșire"]:checked + .radio-label {
+      background: var(--out-bg);
+      border-color: var(--out-color);
+      color: var(--out-color);
+    }
+
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 680px) {
+      .items-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .item-box {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: #f8fafc;
+      transition: 0.2s;
+    }
+
+    .item-box.has-value {
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    .item-box.red-box.has-value { border-color: var(--red-lada); }
+    .item-box.black-box.has-value { border-color: var(--black-lada); }
+    .item-box.palet-box.has-value { border-color: var(--palet-color); }
+
+    .item-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .color-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .qty-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qty-btn {
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 10px;
+      background: #e2e8f0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .qty-btn:active {
+      background: #cbd5e1;
+    }
+
+    .qty-box input {
+      text-align: center;
+      font-size: 1.35rem;
+      font-weight: 800;
+      padding: 10px 4px;
+    }
+
+    .quick-pills {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .pill-btn {
+      flex: 1;
+      padding: 6px 0;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .pill-btn:hover {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .row-2 { grid-template-columns: 1fr; }
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.88rem;
+    }
+
+    th, td {
+      padding: 10px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .badge-in {
+      background: var(--in-bg);
+      color: var(--in-color);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.78rem;
+    }
+
+    .badge-out {
+      background: var(--out-bg);
+      color: var(--out-color);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.78rem;
+    }
+
+    .num-pos { color: var(--in-color); font-weight: 700; }
+    .num-neg { color: var(--out-color); font-weight: 700; }
+    .num-zero { color: var(--muted); }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .modal h3 { margin-top: 0; }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 11px;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-primary-sm {
+      flex: 1;
+      padding: 11px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      z-index: 100;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+      text-align: center;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .btn-outline {
+      padding: 8px 12px;
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+      background: #fff;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <h1>📦 Gestiune Lăzi & Paleți</h1>
+    </div>
+    <div class="status-badge">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Se conectează...</span>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('register', this)">➕ Înregistrare</button>
+    <button class="tab-btn" onclick="switchTab('balance', this)">📊 Sold Firme</button>
+    <button class="tab-btn" onclick="switchTab('history', this)">📋 Istoric</button>
+  </div>
+
+  <!-- TAB 1: INREGISTRARE -->
+  <div id="tab-register" class="card">
+    <form id="entryForm" onsubmit="handleSubmit(event)">
+      <div class="form-group">
+        <label>Firmă / Client</label>
+        <div class="company-row">
+          <select id="companySelect" required>
+            <option value="">-- Selectează firma --</option>
+          </select>
+          <button type="button" class="btn-add-company" onclick="openCompanyModal()">+ Firmă nouă</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Tip operațiune</label>
+        <div class="radio-grid">
+          <label class="radio-card">
+            <input type="radio" name="direction" value="Intrare" checked>
+            <span class="radio-label">⬇️ INTRARE (Retur)</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="direction" value="Ieșire">
+            <span class="radio-label">⬆️ IEȘIRE (Livrare)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Cantități (poți completa una sau toate simultan)</label>
+        <div class="items-grid">
+          <!-- Lada Rosie -->
+          <div class="item-box red-box" id="box-red">
+            <div class="item-header">
+              <span class="color-dot" style="background:#dc2626;"></span>
+              <span>Ladă Roșie</span>
+            </div>
+            <div class="qty-box">
+              <button type="button" class="qty-btn" onclick="changeQty('qtyRed', -1)">−</button>
+              <input type="number" id="qtyRed" min="0" value="0" oninput="highlightBoxes()">
+              <button type="button" class="qty-btn" onclick="changeQty('qtyRed', 1)">+</button>
+            </div>
+            <div class="quick-pills">
+              <button type="button" class="pill-btn" onclick="changeQty('qtyRed', 5)">+5</button>
+              <button type="button" class="pill-btn" onclick="changeQty('qtyRed', 10)">+10</button>
+              <button type="button" class="pill-btn" onclick="setQty('qtyRed', 0)">0</button>
+            </div>
+          </div>
+
+          <!-- Lada Neagra -->
+          <div class="item-box black-box" id="box-black">
+            <div class="item-header">
+              <span class="color-dot" style="background:#0f172a;"></span>
+              <span>Ladă Neagră</span>
+            </div>
+            <div class="qty-box">
+              <button type="button" class="qty-btn" onclick="changeQty('qtyBlack', -1)">−</button>
+              <input type="number" id="qtyBlack" min="0" value="0" oninput="highlightBoxes()">
+              <button type="button" class="qty-btn" onclick="changeQty('qtyBlack', 1)">+</button>
+            </div>
+            <div class="quick-pills">
+              <button type="button" class="pill-btn" onclick="changeQty('qtyBlack', 5)">+5</button>
+              <button type="button" class="pill-btn" onclick="changeQty('qtyBlack', 10)">+10</button>
+              <button type="button" class="pill-btn" onclick="setQty('qtyBlack', 0)">0</button>
+            </div>
+          </div>
+
+          <!-- Palet -->
+          <div class="item-box palet-box" id="box-palet">
+            <div class="item-header">
+              <span class="color-dot" style="background:#d97706;"></span>
+              <span>Palet</span>
+            </div>
+            <div class="qty-box">
+              <button type="button" class="qty-btn" onclick="changeQty('qtyPalet', -1)">−</button>
+              <input type="number" id="qtyPalet" min="0" value="0" oninput="highlightBoxes()">
+              <button type="button" class="qty-btn" onclick="changeQty('qtyPalet', 1)">+</button>
+            </div>
+            <div class="quick-pills">
+              <button type="button" class="pill-btn" onclick="changeQty('qtyPalet', 1)">+1</button>
+              <button type="button" class="pill-btn" onclick="changeQty('qtyPalet', 5)">+5</button>
+              <button type="button" class="pill-btn" onclick="setQty('qtyPalet', 0)">0</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label>Operator / Gestionar (opțional)</label>
+          <input type="text" id="staffInput" placeholder="Ex: Andrei / Maria">
+        </div>
+        <div class="form-group">
+          <label>Observații / Nr. Auto / Aviz (opțional)</label>
+          <input type="text" id="noteInput" placeholder="Ex: B-123-XYZ">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">✅ Salvează Înregistrarea</button>
+    </form>
+  </div>
+
+  <!-- TAB 2: SOLD FIRME -->
+  <div id="tab-balance" class="card hidden">
+    <div class="toolbar">
+      <h3 style="margin:0;">Sold ambalaje pe firmă</h3>
+      <span style="font-size:0.8rem; color:var(--muted);">Minus (-) = la client | Plus (+) = în depozit / de returnat</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Firmă</th>
+            <th>Ladă Roșie</th>
+            <th>Ladă Neagră</th>
+            <th>Palet</th>
+          </tr>
+        </thead>
+        <tbody id="balanceTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 3: ISTORIC -->
+  <div id="tab-history" class="card hidden">
+    <div class="toolbar">
+      <h3 style="margin:0;">Ultimele mișcări</h3>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-outline" onclick="syncFromGoogleSheet()">🔄 Sincronizează</button>
+        <button class="btn-outline" onclick="exportCSV()">📥 Export Excel (CSV)</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data și Ora</th>
+            <th>Firmă</th>
+            <th>Operațiune</th>
+            <th>Ladă Roșie</th>
+            <th>Ladă Neagră</th>
+            <th>Palet</th>
+            <th>Operator</th>
+            <th>Observații</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FIRMA NOUA -->
+<div id="companyModal" class="modal-backdrop hidden">
+  <div class="modal">
+    <h3>➕ Adaugă firmă nouă</h3>
+    <div class="form-group">
+      <label>Nume firmă</label>
+      <input type="text" id="newCompanyName" placeholder="Introdu numele firmei...">
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" onclick="closeCompanyModal()">Anulează</button>
+      <button type="button" class="btn-primary-sm" onclick="addCompany()">Salvează</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+  // =========================================================================
+  // LINK-UL GOOGLE APPS SCRIPT SE PUNE DIRECT AICI (IN INTERIORUL CODULUI):
+  // =========================================================================
+  const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/LINKUL_TAU_AICI/exec";
+  // =========================================================================
+
+  const STORAGE_KEYS = {
+    COMPANIES: 'gestiune_ro_companies_v3',
+    LOGS: 'gestiune_ro_logs_v3',
+    STAFF: 'gestiune_ro_staff_v3'
+  };
+
+  let companies = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPANIES)) || [];
+  let logs = JSON.parse(localStorage.getItem(STORAGE_KEYS.LOGS)) || [];
+
+  function isSheetConfigured() {
+    return GOOGLE_SHEET_URL && GOOGLE_SHEET_URL.startsWith("https://script.google.com/") && !GOOGLE_SHEET_URL.includes("LINKUL_TAU_AICI");
+  }
+
+  function init() {
+    const savedStaff = localStorage.getItem(STORAGE_KEYS.STAFF);
+    if (savedStaff) document.getElementById('staffInput').value = savedStaff;
+
+    renderCompanies();
+    renderAllTables();
+    highlightBoxes();
+
+    if (isSheetConfigured()) {
+      updateConnectionUI(true, 'Conectat la Google Sheet');
+      syncFromGoogleSheet(true);
+    } else {
+      updateConnectionUI(false, 'Link Google Sheet nesetat în cod');
+    }
+  }
+
+  function updateConnectionUI(connected, labelText) {
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    dot.classList.toggle('connected', connected);
+    text.textContent = labelText;
+  }
+
+  function switchTab(tabName, btnEl) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    btnEl.classList.add('active');
+
+    ['register', 'balance', 'history'].forEach(id => {
+      document.getElementById('tab-' + id).classList.toggle('hidden', id !== tabName);
+    });
+
+    if (tabName === 'balance' || tabName === 'history') {
+      renderAllTables();
+    }
+  }
+
+  function changeQty(inputId, delta) {
+    const input = document.getElementById(inputId);
+    let val = parseInt(input.value || '0', 10) + delta;
+    if (val < 0) val = 0;
+    input.value = val;
+    highlightBoxes();
+  }
+
+  function setQty(inputId, val) {
+    document.getElementById(inputId).value = val;
+    highlightBoxes();
+  }
+
+  function highlightBoxes() {
+    const r = parseInt(document.getElementById('qtyRed').value || '0', 10);
+    const b = parseInt(document.getElementById('qtyBlack').value || '0', 10);
+    const p = parseInt(document.getElementById('qtyPalet').value || '0', 10);
+
+    document.getElementById('box-red').classList.toggle('has-value', r > 0);
+    document.getElementById('box-black').classList.toggle('has-value', b > 0);
+    document.getElementById('box-palet').classList.toggle('has-value', p > 0);
+  }
+
+  function renderCompanies() {
+    const select = document.getElementById('companySelect');
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">-- Selectează firma --</option>';
+    companies.sort((a, b) => a.localeCompare(b, 'ro')).forEach(comp => {
+      const opt = document.createElement('option');
+      opt.value = comp;
+      opt.textContent = comp;
+      select.appendChild(opt);
+    });
+    if (companies.includes(currentVal)) {
+      select.value = currentVal;
+    }
+  }
+
+  function openCompanyModal() {
+    document.getElementById('newCompanyName').value = '';
+    document.getElementById('companyModal').classList.remove('hidden');
+    document.getElementById('newCompanyName').focus();
+  }
+
+  function closeCompanyModal() {
+    document.getElementById('companyModal').classList.add('hidden');
+  }
+
+  async function addCompany() {
+    const name = document.getElementById('newCompanyName').value.trim();
+    if (!name) return showToast('Introdu numele firmei.');
+
+    if (!companies.includes(name)) {
+      companies.push(name);
+      localStorage.setItem(STORAGE_KEYS.COMPANIES, JSON.stringify(companies));
+    }
+
+    renderCompanies();
+    document.getElementById('companySelect').value = name;
+    closeCompanyModal();
+    showToast('Firma «' + name + '» a fost adăugată.');
+
+    if (isSheetConfigured()) {
+      try {
+        await fetch(GOOGLE_SHEET_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'addCompany', company: name })
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  function getFormattedNow() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const company = document.getElementById('companySelect').value;
+    const direction = document.querySelector('input[name="direction"]:checked').value;
+    const qtyRed = parseInt(document.getElementById('qtyRed').value || '0', 10);
+    const qtyBlack = parseInt(document.getElementById('qtyBlack').value || '0', 10);
+    const qtyPalet = parseInt(document.getElementById('qtyPalet').value || '0', 10);
+    const staff = document.getElementById('staffInput').value.trim();
+    const note = document.getElementById('noteInput').value.trim();
+
+    if (!company) return showToast('Selectează o firmă.');
+    if (qtyRed + qtyBlack + qtyPalet === 0) {
+      return showToast('Introdu cel puțin o cantitate (Ladă Roșie, Neagră sau Palet).');
+    }
+
+    if (staff) {
+      localStorage.setItem(STORAGE_KEYS.STAFF, staff);
+    }
+
+    const record = {
+      timestamp: getFormattedNow(),
+      company,
+      direction,
+      qtyRed,
+      qtyBlack,
+      qtyPalet,
+      staff,
+      note
+    };
+
+    logs.unshift(record);
+    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
+
+    document.getElementById('qtyRed').value = 0;
+    document.getElementById('qtyBlack').value = 0;
+    document.getElementById('qtyPalet').value = 0;
+    document.getElementById('noteInput').value = '';
+    highlightBoxes();
+    renderAllTables();
+
+    if (isSheetConfigured()) {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Se trimite în Google Sheet...';
+      try {
+        await fetch(GOOGLE_SHEET_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'addLog', ...record })
+        });
+        showToast('✅ Salvat cu succes în Google Sheet!');
+      } catch (err) {
+        showToast('⚠️ Salvat local (eroare de conexiune).');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✅ Salvează Înregistrarea';
+      }
+    } else {
+      showToast('✅ Salvat local (setează linkul Google Sheet în cod).');
+    }
+  }
+
+  function renderAllTables() {
+    const histBody = document.getElementById('historyTableBody');
+    histBody.innerHTML = logs.slice(0, 120).map(row => `
+      <tr>
+        <td style="white-space:nowrap;">${row.timestamp}</td>
+        <td><strong>${row.company}</strong></td>
+        <td><span class="${row.direction === 'Intrare' ? 'badge-in' : 'badge-out'}">${row.direction}</span></td>
+        <td><strong>${row.qtyRed || 0}</strong></td>
+        <td><strong>${row.qtyBlack || 0}</strong></td>
+        <td><strong>${row.qtyPalet || 0}</strong></td>
+        <td>${row.staff || '-'}</td>
+        <td>${row.note || '-'}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="8" style="text-align:center; color:var(--muted);">Nu există înregistrări</td></tr>';
+
+    const balances = {};
+    companies.forEach(c => balances[c] = { red: 0, black: 0, palet: 0 });
+
+    logs.forEach(row => {
+      if (!balances[row.company]) balances[row.company] = { red: 0, black: 0, palet: 0 };
+      const sign = row.direction === 'Intrare' ? 1 : -1;
+      balances[row.company].red += sign * Number(row.qtyRed || 0);
+      balances[row.company].black += sign * Number(row.qtyBlack || 0);
+      balances[row.company].palet += sign * Number(row.qtyPalet || 0);
+    });
+
+    const formatNum = (n) => {
+      if (n > 0) return `<span class="num-pos">+${n}</span>`;
+      if (n < 0) return `<span class="num-neg">${n}</span>`;
+      return `<span class="num-zero">0</span>`;
+    };
+
+    const balBody = document.getElementById('balanceTableBody');
+    balBody.innerHTML = Object.keys(balances).sort((a, b) => a.localeCompare(b, 'ro')).map(comp => {
+      const b = balances[comp];
+      return `
+        <tr>
+          <td><strong>${comp}</strong></td>
+          <td>${formatNum(b.red)}</td>
+          <td>${formatNum(b.black)}</td>
+          <td>${formatNum(b.palet)}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  async function syncFromGoogleSheet(silent = false) {
+    if (!isSheetConfigured()) return;
+    try {
+      const res = await fetch(GOOGLE_SHEET_URL);
+      const data = await res.json();
+      if (data.status === 'ok') {
+        if (Array.isArray(data.companies) && data.companies.length > 0) {
+          companies = Array.from(new Set([...companies, ...data.companies]));
+          localStorage.setItem(STORAGE_KEYS.COMPANIES, JSON.stringify(companies));
+          renderCompanies();
+        }
+        if (Array.isArray(data.logs)) {
+          logs = data.logs.reverse().map(r => ({
+            timestamp: r[0],
+            company: r[1],
+            direction: r[2],
+            qtyRed: Number(r[3] || 0),
+            qtyBlack: Number(r[4] || 0),
+            qtyPalet: Number(r[5] || 0),
+            staff: r[6],
+            note: r[7]
+          }));
+          localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
+          renderAllTables();
+        }
+        if (!silent) showToast('🔄 Sincronizat cu Google Sheet!');
+      }
+    } catch (err) {
+      if (!silent) showToast('Eroare la sincronizarea cu Google Sheet.');
+    }
+  }
+
+  function exportCSV() {
+    const headers = ['Data si Ora', 'Firma', 'Operatiune', 'Lada Rosie', 'Lada Neagra', 'Palet', 'Operator', 'Observatii'];
+    const rows = logs.map(r => [r.timestamp, r.company, r.direction, r.qtyRed, r.qtyBlack, r.qtyPalet, r.staff, r.note]);
+    const csvContent = '\uFEFF' + [headers, ...rows].map(e => e.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `gestiune_lazi_paleti_${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.remove('hidden');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => t.classList.add('hidden'), 3200);
+  }
+
+  init();
+</script>
+</body>
+</html>
